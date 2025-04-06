@@ -5,9 +5,9 @@ function [W, b] = STM(X, Y, C, epsilon, maxIt)
     % X contains input samples. It is a (d+1)-way tensor. If X1 is 3-way tensor 
     % and X contains 3 samples, then it is a 4-way tensor.
     %
-    % Y is a vector of class labels of shape Y = [l1, l2, ..., lm]'
+    % Y is a vector of class labels.
     %
-    % C is regularization parameter
+    % C is regularization parameter.
     addpath('utils');
     
     sizes = size(X);
@@ -47,7 +47,7 @@ function [W, b] = STM(X, Y, C, epsilon, maxIt)
             % now we optimize for w{j}
             cvx_begin
                 cvx_quiet true
-                variable w_j(dim,1)
+                variables w_j(dim,1)
                 variable b
                 variable zeta(m,1)
     
