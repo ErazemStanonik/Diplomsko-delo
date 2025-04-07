@@ -50,19 +50,26 @@ function [W, b] = STuM(X, Y, ranks, C, maxIt, epsilon)
                 Xj_tilde(i,:) = vec(mode_n_matricization(X(idx{:}).data,j) * Hj' * K_sqrt_);
             end
 
-            cvx_begin
-                cvx_quiet true
-                variable Pj_tilde(size(P{j}))
-                variable b
-                variable zeta(m,1)
-
-                minimize(0.5 * vec(Pj_tilde)' * vec(Pj_tilde) + C * sum(zeta))
-
-                subject to
-                    Y .* (Xj_tilde * vec(Pj_tilde) + b) >= 1 - zeta;
-                    zeta >= 0;
-                    
-            cvx_end
+            try
+                cvx_begin
+                    cvx_quiet true
+                    variable Pj_tilde(size(P{j}))
+                    variable b
+                    variable zeta(m,1)
+    
+                    minimize(0.5 * vec(Pj_tilde)' * vec(Pj_tilde) + C * sum(zeta))
+    
+                    subject to
+                        Y .* (Xj_tilde * vec(Pj_tilde) + b) >= 1 - zeta;
+                        zeta >= 0;
+                        
+                cvx_end
+            catch
+                fprintf('WARNING: ERROR\nSupport Tucker Machine could not aproximate W for given ranks.\n');
+                W = -1;
+                b = -1;
+                return;
+            end
 
             % update P{j}
             P{j} = Pj_tilde * K_sqrt_;
