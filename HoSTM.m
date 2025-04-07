@@ -1,4 +1,4 @@
-function [W, b] = HigherRankSTM(X,Y,R,C,epsilon,maxIt)
+function [W, b] = HoSTM(X,Y,R,C,epsilon,maxIt)
     % This function performs Support Tensor Machine using Alternating
     % optimization procedure. 
     % It proposes W is in CP decomposition format.
