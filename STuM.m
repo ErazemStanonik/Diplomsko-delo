@@ -18,7 +18,7 @@ function [W, b] = STuM(X, Y, ranks, C, maxIt, epsilon)
     assert(sizes(d+1) == m, "Error: Number of samples in X is not the same as number of samples in Y");
     
     % initialize core and factor matrices
-    G = tensor(rand(ranks));
+    G = tensor(rand(ranks),ranks);
     P = cell(1,d);
     for k = 1:d
         P{k} = rand(sizes(k),ranks(k));
@@ -37,7 +37,7 @@ function [W, b] = STuM(X, Y, ranks, C, maxIt, epsilon)
         for j = 1:d
             
             P_j = calculate_pj(P,j,d);
-            Hj = mode_n_matricization(G.data, j) * P_j';
+            Hj = mode_n_matricization(G, j) * P_j';
 
             K = Hj * Hj';
             [V,D] = eig(K);
@@ -47,23 +47,26 @@ function [W, b] = STuM(X, Y, ranks, C, maxIt, epsilon)
             for i = 1:m
                 idx = repmat({':'}, 1, d);
                 idx{d + 1} = i;
-                Xj_tilde(i,:) = vec(mode_n_matricization(X(idx{:}).data,j) * Hj' * K_sqrt_);
+                Xj_tilde(i,:) = vec(mode_n_matricization(X(idx{:}),j) * Hj' * K_sqrt_);
             end
 
             try
-                cvx_begin
-                    cvx_quiet true
-                    variable Pj_tilde(size(P{j}))
-                    variable b
-                    variable zeta(m,1)
-    
-                    minimize(0.5 * vec(Pj_tilde)' * vec(Pj_tilde) + C * sum(zeta))
-    
-                    subject to
-                        Y .* (Xj_tilde * vec(Pj_tilde) + b) >= 1 - zeta;
-                        zeta >= 0;
-                        
-                cvx_end
+%                 cvx_begin
+%                     cvx_quiet true
+%                     variable Pj_tilde(size(P{j}))
+%                     variable b
+%                     variable xi(m,1)
+%     
+%                     minimize(0.5 * vec(Pj_tilde)' * vec(Pj_tilde) + C * sum(xi))
+%     
+%                     subject to
+%                         Y .* (Xj_tilde * vec(Pj_tilde) + b) >= 1 - xi;
+%                         xi >= 0;
+%                 cvx_end
+                % fitcsvm is faster than cvx
+                Pj_SVM = fitcsvm(Xj_tilde,Y);
+                Pj_tilde = reshape(Pj_SVM.Beta, sizes(j),[]);
+                b = Pj_SVM.Bias;
             catch
                 fprintf('WARNING: ERROR\nSupport Tucker Machine could not aproximate W for given ranks.\n');
                 W = -1;
@@ -83,18 +86,22 @@ function [W, b] = STuM(X, Y, ranks, C, maxIt, epsilon)
             idx{d + 1} = i;
             Xj(i,:) = vec(X(idx{:}));
         end
-        cvx_begin
-            cvx_quiet true;
-            variable G1(ranks(1),prod(ranks(2:d)))
-            variable b
-            variable zeta(m,1)
-
-            minimize(0.5 * (Px*vec(G1))' * (Px*vec(G1)) + C * sum(zeta))
-
-            subject to
-                Y .* (Xj * Px*vec(G1) + b) >= 1 - zeta;
-                zeta >= 0;
-        cvx_end
+%         cvx_begin
+%             cvx_quiet true;
+%             variable G1(ranks(1),prod(ranks(2:d)))
+%             variable b
+%             variable xi(m,1)
+% 
+%             minimize(0.5 * (Px*vec(G1))' * (Px*vec(G1)) + C * sum(xi))
+% 
+%             subject to
+%                 Y .* (Xj * Px*vec(G1) + b) >= 1 - xi;
+%                 xi >= 0;
+%         cvx_end
+        % again here ...
+        G_SVM = fitcsvm(Xj,Y);
+        G1 = pinv(Px)*G_SVM.Beta;
+        b = G_SVM.Bias;
 
         G = tensor(reshape(G1, ranks));
 
@@ -108,3 +115,12 @@ function [W, b] = STuM(X, Y, ranks, C, maxIt, epsilon)
     % we reconstruct Tucker decomposition of W back to W
     W = ttm(G,P);
 end
+%
+%
+%
+%
+%
+%
+%
+%
+%

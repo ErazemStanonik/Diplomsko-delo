@@ -1,9 +1,8 @@
-function accuracy = testHoSTM(X,Y,k)
+function accuracy = testHrSTM(X,Y,k)
     % This method will test the average accuracy of the STM method
     % using k-fold cross validation.
     
-    sz = size(X);
-    d = length(sz) - 1;
+    d = ndims(X) - 1;
     num_samples = length(Y);
 
     group_size = num_samples / k;
@@ -15,24 +14,25 @@ function accuracy = testHoSTM(X,Y,k)
     for i = 1:k
         test_idx = (i-1)*group_size+(1:group_size);
         train_idx = setdiff(1:num_samples,test_idx);
+        % we don't know the exact size of samples in X
+        idx = repmat({':'},1,d);
         % split the data
-        trainX = X(:,:,train_idx);
+        trainX = X(idx{:},train_idx);
         trainY = Y(train_idx);
-        testX = X(:,:,test_idx);
+        testX = X(idx{:},test_idx);
         testY = Y(test_idx);
 
-        [W,b] = HoSTM(trainX,trainY,4,1,1e-5,10);
+        [W,b] = HrSTM(trainX,trainY,3,1,1e-5,10);
         if b == -1
             continue;
         end
-        W = tensor(W);
 
-        fun = @(X) sign(innerprod(W,tensor(X)) + b);
+        fun = @(X) sign(innerprod(W,X) + b);
 
         % we now check the accuracy
         t = 0;
         for j = 1:group_size
-            res = fun(testX(:,:,j));
+            res = fun(testX(idx{:},j));
             if res == testY(j)
                 t = t + 1;
             end
@@ -42,5 +42,5 @@ function accuracy = testHoSTM(X,Y,k)
         accuracy = accuracy + acc;
     end
     accuracy = accuracy / k;
-    fprintf('Overall HoSTM ACCURACY = %.2f\n', accuracy);
+    fprintf('Overall HrSTM ACCURACY = %.2f\n', accuracy);
 end

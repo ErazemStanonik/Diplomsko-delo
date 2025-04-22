@@ -20,7 +20,7 @@ function x_i = calculate_xi(X, w, d, j)
             order2 = num2cell(sz(l+1:d));
             Xi = reshape(Xi, order1{:}, 1, order2{:});
         end
-        X = Xi;
+        X = tensor(Xi);
     end
     x_i = vec(Xi);
 end

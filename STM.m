@@ -10,8 +10,8 @@ function [W, b] = STM(X, Y, C, epsilon, maxIt)
     % C is regularization parameter.
     addpath('utils');
     
-    sizes = size(X);
-    d = length(sizes) - 1;  % each sample is a d-way tensor
+    sizes = X.size;
+    d = ndims(X) - 1;  % each sample is a d-way tensor
     m = length(Y);          % we have m samples
     
     assert(sizes(d+1) == m, "Error: Number of samples in X is not the same as number of samples in Y");
@@ -45,20 +45,25 @@ function [W, b] = STM(X, Y, C, epsilon, maxIt)
             end
             
             % now we optimize for w{j}
-            cvx_begin
-                cvx_quiet true
-                variables w_j(dim,1)
-                variable b
-                variable zeta(m,1)
-    
-                minimize(0.5*beta*sum_square(w_j) + C * sum(zeta))
-    
-                subject to
-                    Y .* (x_i * w_j + b) >= 1 - zeta;
-                    zeta >= 0;
-    
-            cvx_end
+%             cvx_begin
+%                 cvx_quiet true
+%                 variables w_j(dim,1)
+%                 variable b
+%                 variable xi(m,1)
+%     
+%                 minimize(0.5*beta*sum_square(w_j) + C * sum(xi))
+%     
+%                 subject to
+%                     Y .* (x_i * w_j + b) >= 1 - xi;
+%                     xi >= 0;
+%     
+%             cvx_end
             
+            % fitcsvm is faster
+            w_j_SVM = fitcsvm(x_i,Y,'BoxConstraint',C/beta);
+            w_j = w_j_SVM.Beta;
+            b = w_j_SVM.Bias;
+
             % update error and ...
             err = err + norm(w{j}-w_j, 'fro');
     
@@ -67,5 +72,5 @@ function [W, b] = STM(X, Y, C, epsilon, maxIt)
         end
         it = it+1;
     end
-    W = toTensor(w);
+    W = tensor(toTensor(w));
 end

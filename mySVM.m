@@ -3,7 +3,7 @@ function [w, b, support_vectors] = mySVM(X, Y, kernel, C)
     % X is of shape number_of_samples x vector_length, 
     % Y is of shape number_of_samples x 1
     % check if both have the same nuber of observations
-    [sizeX, ~] = size(X);
+    sizeX = size(X,1);
     sizeY = length(Y);
 
     assert(sizeX == sizeY, 'Error: Number of classes should be the same to number of observations.');
@@ -23,7 +23,7 @@ function [w, b, support_vectors] = mySVM(X, Y, kernel, C)
 
     sv = find(alphas >= 1e-5,1);
     support_vectors = find(alphas > 1e-5);
-    w = (alphas.*Y)'*X;
+    w = ((alphas.*Y)'*X)';
     b = Y(sv) - dot(w,X(sv,:));
 
 end

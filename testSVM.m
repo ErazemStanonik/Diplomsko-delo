@@ -2,16 +2,17 @@ function accuracy = testSVM(X,Y,k)
     % This method will test the average accuracy of the basic SVM method
     % using k-fold cross validation.
     
-    sz = size(X);
-    d = length(sz) - 1;
+    sz = X.size;
+    d = ndims(X) - 1;
     num_samples = length(Y);
 
     group_size = num_samples / k;
 
     % we have to vectorize the data
     vecX = zeros(num_samples,prod(sz(1:d)));
+    idx = repmat({':'},1,d);
     for m = 1:num_samples
-        vecX(m,:) = vec(X(:,:,m))';
+        vecX(m,:) = vec(X(idx{:},m))';
     end
 
     accuracy = 0;
@@ -30,6 +31,7 @@ function accuracy = testSVM(X,Y,k)
         SVM = fitcSVM(trainX,trainY);
         w = SVM.Beta;
         b = SVM.Bias;
+%         [w,b] = mySVM(trainX,trainY,'linear',1);
 
         fun = @(x) sign(x*w + b);
 

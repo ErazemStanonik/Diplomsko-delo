@@ -43,7 +43,7 @@ legend('-1', '1', 'Support Vector', 'Upper Margin', 'Lower Margin');
 hold off;
 
 % now we call mySVM on given data
-[w, b, sv_index] = mySVM(X,Y,'linear', 1);
+[w, b, sv_index] = mySVM(X,Y,'linear', 100);
 
 sv = X(sv_index,:);
 X2 = (-w(1) * X1-b) / w(2);     % X1 stays the same

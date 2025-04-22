@@ -1,4 +1,4 @@
-function [W, b] = HoSTM(X,Y,R,C,epsilon,maxIt)
+function [W, b] = HrSTM(X,Y,R,C,epsilon,maxIt)
     % This function performs Support Tensor Machine using Alternating
     % optimization procedure. 
     % It proposes W is in CP decomposition format.
@@ -19,8 +19,8 @@ function [W, b] = HoSTM(X,Y,R,C,epsilon,maxIt)
     % exits with an error.
     addpath('utils');
     
-    sizes = size(X);
-    d = length(sizes) - 1;
+    sizes = X.size;
+    d = ndims(X) - 1;
     m = length(Y);
 
     assert(sizes(d+1) == m, "Error: Number of samples in X is not the same as number of samples in Y");
@@ -47,29 +47,34 @@ function [W, b] = HoSTM(X,Y,R,C,epsilon,maxIt)
             [V,D] = eig(B);
             B_sqrt_ = V * diag(1 ./ sqrt(diag(D))) * V';
             
-            Xji_tilde = cell(1,m);
+            Xji_tilde = zeros(m, dim*R);
+            %Xji_tilde = cell(1,m);
             for i = 1:m
                 idx = repmat({':'}, 1, d);
                 idx{d + 1} = i;
-                Xji_tilde{i} = vec(mode_n_matricization(X(idx{:}),j) * U_j * B_sqrt_);
+                %Xji_tilde{i} = vec(mode_n_matricization(X(idx{:}),j) * U_j * B_sqrt_);
+                Xji_tilde(i,:) = vec(mode_n_matricization(X(idx{:}),j) * U_j * B_sqrt_);
             end
 
             try
-                cvx_begin
-                    cvx_quiet true
-                    variable Uj_tilde(dim,R)
-                    variable b
-                    variable zeta(m,1)
-    
-                    minimize(0.5 * vec(Uj_tilde)' * vec(Uj_tilde) + C * sum(zeta))
-    
-                    subject to 
-                        for i = 1:m
-                            Y(i) .* (vec(Uj_tilde)' * vec(Xji_tilde{i}) + b) >= 1 - zeta(i);
-                            zeta(i) >= 0;
-                        end
-                        
-                cvx_end
+%                 cvx_begin
+%                     cvx_quiet true
+%                     variable Uj_tilde(dim,R)
+%                     variable b
+%                     variable xi(m,1)
+%     
+%                     minimize(0.5 * vec(Uj_tilde)' * vec(Uj_tilde) + C * sum(xi))
+%     
+%                     subject to 
+%                         for i = 1:m
+%                             Y(i) .* (vec(Uj_tilde)' * vec(Xji_tilde{i}) + b) >= 1 - xi(i);
+%                             xi(i) >= 0;
+%                         end
+%                         
+%                 cvx_end
+                Uj_SVM = fitcsvm(Xji_tilde,Y);
+                Uj_tilde = reshape(Uj_SVM.Beta, [], R);
+                b = Uj_SVM.Bias;
             catch
                 fprintf('WARNING: ERROR\nHigherRankSTM could not aproximate W for R = %d.\n', R);
                 W = -1;
@@ -83,5 +88,5 @@ function [W, b] = HoSTM(X,Y,R,C,epsilon,maxIt)
         end
         it = it + 1;
     end
-    W = cpToTensor(cores,ones(R),R,sizes(1:d));
+    W = tensor(cpToTensor(cores,ones(R),R,sizes(1:d)));
 end
