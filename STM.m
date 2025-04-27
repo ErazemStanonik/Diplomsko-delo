@@ -1,4 +1,4 @@
-function [W, b] = STM(X, Y, C, epsilon, maxIt)
+function [W, b] = STM(X, Y,solver, C, epsilon, maxIt)
     % This function trains Support Tensor Machine (STM) using Alternating
     % optimization procedure.
     %
@@ -44,25 +44,30 @@ function [W, b] = STM(X, Y, C, epsilon, maxIt)
                 x_i(i,:) = calculate_xi(X(idx{:}), w, d, j);
             end
             
-            % now we optimize for w{j}
-%             cvx_begin
-%                 cvx_quiet true
-%                 variables w_j(dim,1)
-%                 variable b
-%                 variable xi(m,1)
-%     
-%                 minimize(0.5*beta*sum_square(w_j) + C * sum(xi))
-%     
-%                 subject to
-%                     Y .* (x_i * w_j + b) >= 1 - xi;
-%                     xi >= 0;
-%     
-%             cvx_end
-            
-            % fitcsvm is faster
-            w_j_SVM = fitcsvm(x_i,Y,'BoxConstraint',C/beta);
-            w_j = w_j_SVM.Beta;
-            b = w_j_SVM.Bias;
+            if strcmp(solver, 'fitcsvm')
+                % fitcsvm is faster
+                w_j_SVM = fitcsvm(x_i,Y,'BoxConstraint',C/beta);
+                w_j = w_j_SVM.Beta;
+                b = w_j_SVM.Bias;
+            elseif strcmp(solver, 'cvx')
+                % now we optimize for w{j}
+                cvx_begin
+                    cvx_quiet true
+                    variables w_j(dim,1)
+                    variable b
+                    variable xi(m,1)
+        
+                    minimize(0.5*beta*sum_square(w_j) + C * sum(xi))
+        
+                    subject to
+                        Y .* (x_i * w_j + b) >= 1 - xi;
+                        xi >= 0;
+        
+                cvx_end
+            else
+                fprintf('Solver should be either "fitcsvm" or "cvx" and not "%s".\n', solver);
+                return;
+            end
 
             % update error and ...
             err = err + norm(w{j}-w_j, 'fro');

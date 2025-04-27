@@ -1,4 +1,4 @@
-function [W, b] = HrSTM(X,Y,R,C,epsilon,maxIt)
+function [W, b] = HrSTM(X,Y,solver,R,C,epsilon,maxIt)
     % This function performs Support Tensor Machine using Alternating
     % optimization procedure. 
     % It proposes W is in CP decomposition format.
@@ -45,36 +45,45 @@ function [W, b] = HrSTM(X,Y,R,C,epsilon,maxIt)
 
             B = U_j' * U_j;
             [V,D] = eig(B);
+%             % we set the eigenvalues belowe a certain threshold to 0
+%             th = 0.1;
+%             newD = diag(1 ./ sqrt(diag(D)));
+%             newD(newD < th) = 0;
+%             B_sqrt_ = V * newD * V';
             B_sqrt_ = V * diag(1 ./ sqrt(diag(D))) * V';
+            %B_sqrt_ = pinv(sqrtm(B)); 
             
             Xji_tilde = zeros(m, dim*R);
-            %Xji_tilde = cell(1,m);
             for i = 1:m
                 idx = repmat({':'}, 1, d);
                 idx{d + 1} = i;
-                %Xji_tilde{i} = vec(mode_n_matricization(X(idx{:}),j) * U_j * B_sqrt_);
                 Xji_tilde(i,:) = vec(mode_n_matricization(X(idx{:}),j) * U_j * B_sqrt_);
             end
 
             try
-%                 cvx_begin
-%                     cvx_quiet true
-%                     variable Uj_tilde(dim,R)
-%                     variable b
-%                     variable xi(m,1)
-%     
-%                     minimize(0.5 * vec(Uj_tilde)' * vec(Uj_tilde) + C * sum(xi))
-%     
-%                     subject to 
-%                         for i = 1:m
-%                             Y(i) .* (vec(Uj_tilde)' * vec(Xji_tilde{i}) + b) >= 1 - xi(i);
-%                             xi(i) >= 0;
-%                         end
-%                         
-%                 cvx_end
-                Uj_SVM = fitcsvm(Xji_tilde,Y);
-                Uj_tilde = reshape(Uj_SVM.Beta, [], R);
-                b = Uj_SVM.Bias;
+                if strcmp(solver,'fitcsvm')
+                    Uj_SVM = fitcsvm(Xji_tilde,Y,'BoxConstraint',C);
+                    Uj_tilde = reshape(Uj_SVM.Beta, [], R);
+                    b = Uj_SVM.Bias;
+                elseif strcmp(solver,'cvx')
+                    cvx_begin
+                        cvx_quiet true
+                        variable Uj_tilde(dim,R)
+                        variable b
+                        variable xi(m,1)
+        
+                        minimize(0.5 * vec(Uj_tilde)' * vec(Uj_tilde) + C * sum(xi))
+        
+                        subject to 
+                            Y .* (Xji_tilde * vec(Uj_tilde) + b) >= 1 - xi;
+                            xi >= 0;
+                            
+                    cvx_end
+                else
+                    fprintf('Solver should be either "fitcsvm" or "cvx" and not "%s".\n', solver);
+                    return;
+                end
+                
             catch
                 fprintf('WARNING: ERROR\nHigherRankSTM could not aproximate W for R = %d.\n', R);
                 W = -1;

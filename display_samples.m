@@ -5,7 +5,7 @@ d = ndims(X)-1;
 for i = 1:m
     idx = repmat({':'},1,d);
     imshow(X(idx{:},i).data);
-    pause(0.5);
+    pause(0.25);
 end
 
 end

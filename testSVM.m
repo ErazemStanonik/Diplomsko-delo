@@ -1,4 +1,4 @@
-function accuracy = testSVM(X,Y,k)
+function accuracy = testSVM(X,Y,kernel,solver,k)
     % This method will test the average accuracy of the basic SVM method
     % using k-fold cross validation.
     
@@ -28,12 +28,16 @@ function accuracy = testSVM(X,Y,k)
         testX = vecX(test_idx,:);
         testY = Y(test_idx);
 
-        SVM = fitcSVM(trainX,trainY);
-        w = SVM.Beta;
-        b = SVM.Bias;
-%         [w,b] = mySVM(trainX,trainY,'linear',1);
-
-        fun = @(x) sign(x*w + b);
+        if strcmp(solver, 'fitcsvm')
+            SVM = fitcsvm(trainX,trainY,'KernelFunction',kernel);
+            fun = @(x) predict(SVM, x);
+        elseif strcmp(solver, 'cvx')
+            [w,b] = mySVM(trainX,trainY,'linear',1);
+            fun = @(x) sign(x*w + b);
+        else
+            fprintf('Solver should be either "fitcsvm" or "cvx" and not "%s".\n', solver);
+            return;
+        end
 
         % we now check the accuracy
         t = 0;

@@ -42,6 +42,7 @@ function [W, b] = STuM(X, Y, ranks, C, maxIt, epsilon)
             K = Hj * Hj';
             [V,D] = eig(K);
             K_sqrt_ = V * diag(1 ./ sqrt(diag(D))) * V';
+            %K_sqrt_ = pinv(sqrtm(K));
 
             Xj_tilde = zeros(m, sizes(j)*ranks(j));
             for i = 1:m
@@ -64,7 +65,7 @@ function [W, b] = STuM(X, Y, ranks, C, maxIt, epsilon)
 %                         xi >= 0;
 %                 cvx_end
                 % fitcsvm is faster than cvx
-                Pj_SVM = fitcsvm(Xj_tilde,Y);
+                Pj_SVM = fitcsvm(Xj_tilde,Y,'BoxConstraint',C);
                 Pj_tilde = reshape(Pj_SVM.Beta, sizes(j),[]);
                 b = Pj_SVM.Bias;
             catch
@@ -84,7 +85,7 @@ function [W, b] = STuM(X, Y, ranks, C, maxIt, epsilon)
         for i = 1:m
             idx = repmat({':'}, 1, d);
             idx{d + 1} = i;
-            Xj(i,:) = vec(X(idx{:}));
+            Xj(i,:) = vec(mode_n_matricization(X(idx{:}),j));
         end
 %         cvx_begin
 %             cvx_quiet true;
@@ -99,11 +100,12 @@ function [W, b] = STuM(X, Y, ranks, C, maxIt, epsilon)
 %                 xi >= 0;
 %         cvx_end
         % again here ...
-        G_SVM = fitcsvm(Xj,Y);
+        G_SVM = fitcsvm(Xj,Y,'BoxConstraint',C);
         G1 = pinv(Px)*G_SVM.Beta;
+        %G1 = Px \ G_SVM.Beta;
         b = G_SVM.Bias;
 
-        G = tensor(reshape(G1, ranks));
+        G = tensor(reshape(G1, ranks), ranks);
 
         % we have to check for err
         err = norm(G - G_old);
@@ -115,12 +117,3 @@ function [W, b] = STuM(X, Y, ranks, C, maxIt, epsilon)
     % we reconstruct Tucker decomposition of W back to W
     W = ttm(G,P);
 end
-%
-%
-%
-%
-%
-%
-%
-%
-%

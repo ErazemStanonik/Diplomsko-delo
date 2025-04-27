@@ -1,4 +1,4 @@
-function accuracy = testSTuM(X,Y,k)
+function accuracy = testSTuM(X,Y,k,ranks,C)
     % This method will test the average accuracy of the STM method
     % using k-fold cross validation.
     
@@ -22,7 +22,7 @@ function accuracy = testSTuM(X,Y,k)
         testX = X(idx{:},test_idx);
         testY = Y(test_idx);
 
-        [W,b] = STuM(trainX,trainY,[1,1,1],1,10,1e-5);
+        [W,b] = STuM(trainX,trainY,ranks,C,10,1e-5);
         if b == -1
             continue;
         end

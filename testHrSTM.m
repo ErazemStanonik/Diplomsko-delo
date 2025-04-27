@@ -1,4 +1,4 @@
-function accuracy = testHrSTM(X,Y,k)
+function accuracy = testHrSTM(X,Y,solver,k,R,C)
     % This method will test the average accuracy of the STM method
     % using k-fold cross validation.
     
@@ -22,7 +22,7 @@ function accuracy = testHrSTM(X,Y,k)
         testX = X(idx{:},test_idx);
         testY = Y(test_idx);
 
-        [W,b] = HrSTM(trainX,trainY,3,1,1e-5,10);
+        [W,b] = HrSTM(trainX,trainY,solver,R,C,1e-5,10);
         if b == -1
             continue;
         end
