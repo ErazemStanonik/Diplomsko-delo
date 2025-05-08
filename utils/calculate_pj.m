@@ -4,7 +4,8 @@ function Pj = calculate_pj(factors, j, d)
     % matrix.
     
     Pj = 1;
-    for k = setdiff(1:d,j)
+    idx = setdiff(1:d,j);
+    for k = idx(end:-1:1)
         Pj = kron(Pj, factors{k});
     end
 end

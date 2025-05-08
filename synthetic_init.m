@@ -1,4 +1,4 @@
-function [X,Y] = synthetic_init(sample_num,img_size,background, random)
+function [trainX,trainY, testX,testY] = synthetic_init(sample_num,img_size,background, random)
 % We will generate BLACK AND WHITE squares, triangles and circles.
 % 
 % sample num tells us number of observations
@@ -21,8 +21,8 @@ end
 
 assert(mod(img_size,8) == 0, 'Parameter img_size should be an divisible by 8');
 
-X = tensor(zeros(img_size, img_size, 2*sample_num));
-Y = zeros(2*sample_num,1);
+X = tensor(zeros(img_size, img_size, 3*sample_num));
+Y = zeros(3*sample_num,1);
 
 % Square
 for i = 1:sample_num
@@ -45,28 +45,29 @@ for i = 1:sample_num
 end
 
 % Triangle
-% for j = 1:sample_num %j = sample_num+1:2*sample_num
-%     img = ones(img_size) * bg;
-%     if random
-%         % triangle sizes will vary from 1/16 to 1/4 of img
-%         triangle_size = randi([img_size/4,img_size/2+img_size/4]);
-%         % we also choose x and y position as random
-%         x = randi([1,img_size-triangle_size+1]);
-%         y = randi([1,img_size-triangle_size+1]);
-%     else
-%         triangle_size = 3*img_size/4;
-%         x = img_size / 8;
-%         y = img_size / 8;
-%     % we now fill the triangle. Triangle will be lower left.
-%     for k = 1:triangle_size
-%         img(y+k-1,x:x+k-1) = value;
-%     end
-%     X(:,:,j) = img;
-%     Y(j) = -1;
-% end
+for j = sample_num+1:2*sample_num
+    img = ones(img_size) * bg;
+    if random
+        % triangle sizes will vary from 1/16 to 1/4 of img
+        triangle_size = randi([img_size/4,img_size/2+img_size/4]);
+        % we also choose x and y position as random
+        x = randi([1,img_size-triangle_size+1]);
+        y = randi([1,img_size-triangle_size+1]);
+    else
+        triangle_size = 3*img_size/4;
+        x = img_size / 8;
+        y = img_size / 8;
+    end
+    % we now fill the triangle. Triangle will be lower left.
+    for k = 1:triangle_size
+        img(y+k-1,x:x+k-1) = value;
+    end
+    X(:,:,j) = img;
+    Y(j) = 2;
+end
 
 % Circle
-for l = sample_num+1:2*sample_num%2*sample_num+1:3*sample_num
+for l = 2*sample_num+1:3*sample_num
     img = ones(img_size) * bg;
     if random
         radius = randi([2*img_size/8,3*img_size/8]);
@@ -89,10 +90,14 @@ for l = sample_num+1:2*sample_num%2*sample_num+1:3*sample_num
         end
     end
     X(:,:,l) = img;
-    Y(l) = -1;%0;
+    Y(l) = 3;
 end
-    
-% now we remix the order in X and Y so we can use cross-validation.
-order = randperm(2*sample_num);
-X = X(:,:,order);
-Y = Y(order);
+
+% split into training and testing
+class_size = round(sample_num / 5);
+train_idx = setdiff(1:3*sample_num, [1:class_size, sample_num+1:sample_num+class_size, 2*sample_num+1:2*sample_num+class_size]);
+test_idx = setdiff(1:3*sample_num, train_idx);
+trainX = X(:,:,train_idx);
+trainY = Y(train_idx);
+testX = X(:,:,test_idx);
+testY = Y(test_idx);

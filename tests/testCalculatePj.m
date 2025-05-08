@@ -22,19 +22,19 @@ classdef testCalculatePj < matlab.unittest.TestCase
     methods (Test)
         function testCase1(testCase)
             actual = calculate_pj(testCase.factors,1,3);
-            expected = [7 14 8 16; 21 28 24 32; 9 18 10 20; 27 36 30 40];
+            expected = [7 8 14 16; 9 10 18 20; 21 24 28 32; 27 30 36 40];
             testCase.verifyEqual(actual, expected);
         end
 
         function testCase2(testCase)
             actual = calculate_pj(testCase.factors,2,3);
-            expected = [1 2 0 0; 3 4 0 0; 0 0 1 2; 0 0 3 4];
+            expected = [1 0 2 0; 0 1 0 2; 3 0 4 0; 0 3 0 4];
             testCase.verifyEqual(actual, expected);
         end
 
         function testCase3(testCase)
             actual = calculate_pj(testCase.factors,3,3);
-            expected = [7 8 0 0; 9 10 0 0; 0 0 7 8; 0 0 9 10];
+            expected = [7 0 8 0; 0 7 0 8; 9 0 10 0; 0 9 0 10];
             testCase.verifyEqual(actual, expected);
         end
     end

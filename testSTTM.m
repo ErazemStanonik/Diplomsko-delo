@@ -1,5 +1,5 @@
 function accuracy = testSTTM(X,Y,mode,solver,k,C)
-    % This method will test the average accuracy of the STM method
+    % This method will test the average accuracy of the STTM method
     % using k-fold cross validation.  
     %
     % mode parameter tells us if samples are RGB pictuers
@@ -54,7 +54,7 @@ function accuracy = testSTTM(X,Y,mode,solver,k,C)
         testX = samples(test_idx);
         testY = Y(test_idx);
 
-        [W,b] = STTM(samples(train_idx),Y(train_idx),n,ranks,d,100,1e-3);
+        [W,b] = STTM(samples(train_idx),Y(train_idx),n,ranks,d,1e-3,100);
 
         % We have to transform cores in W to tt_tensor class ...
         ttW = tt_core_to_tt_tensor(W,n,ranks,d,ps);
@@ -78,5 +78,5 @@ function accuracy = testSTTM(X,Y,mode,solver,k,C)
         accuracy = accuracy + acc;
     end
     accuracy = accuracy / k;
-    fprintf('Overall HrSTM ACCURACY = %.2f\n', accuracy);
+    fprintf('Overall STTM ACCURACY = %.2f\n', accuracy);
 end

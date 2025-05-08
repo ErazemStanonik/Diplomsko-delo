@@ -1,4 +1,4 @@
-function [tt_cores, b] = STTM(X,Y,n,ranks,d,maxIt,epsilon)
+function [tt_cores, b] = STTM(X,Y,n,ranks,d,epsilon,maxIt)
 % This function performs Support Tensor Train Machine using  Alternating 
 % optimization procedure.
 %
@@ -8,10 +8,6 @@ function [tt_cores, b] = STTM(X,Y,n,ranks,d,maxIt,epsilon)
 % done with reshape_cores.m function which transform each sample from 
 % tt_tensor to a cell of d core tensors. This should be done beforehand -
 % look at testSTTM.m
-%
-% parameter sample is the original tt_tensor of samples in X. It tells us
-% the dimensionality, ranks and shape of samples as a tensor.
-
 m = length(Y);
 
 % initialize W^(k) randomly
@@ -100,7 +96,5 @@ while err > epsilon && it < maxIt
         err = err + norm(tt_cores{i} - tt_cores_old{i}, 'fro') / norm(tt_cores{i}, 'fro');
     end
     it = it + 1;
-    %err
 end
-err
-it
+fprintf("Error after %d iterations is %f\n", it, err);

@@ -45,12 +45,13 @@ function [W, b] = HrSTM(X,Y,solver,R,C,epsilon,maxIt)
 
             B = U_j' * U_j;
             [V,D] = eig(B);
-%             % we set the eigenvalues belowe a certain threshold to 0
-%             th = 0.1;
-%             newD = diag(1 ./ sqrt(diag(D)));
-%             newD(newD < th) = 0;
-%             B_sqrt_ = V * newD * V';
-            B_sqrt_ = V * diag(1 ./ sqrt(diag(D))) * V';
+            % we set the eigenvalues belowe a certain threshold to 0
+            % possible improvement for future papers
+%             th = 1e-2;
+%             D(D<th) = Inf;
+            newD = diag(1 ./ sqrt(diag(D)));
+            B_sqrt_ = V * newD * V';
+            %B_sqrt_ = V * diag(1 ./ sqrt(diag(D))) * V';
             %B_sqrt_ = pinv(sqrtm(B)); 
             
             Xji_tilde = zeros(m, dim*R);

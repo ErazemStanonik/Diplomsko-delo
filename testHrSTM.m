@@ -22,7 +22,7 @@ function accuracy = testHrSTM(X,Y,solver,k,R,C)
         testX = X(idx{:},test_idx);
         testY = Y(test_idx);
 
-        [W,b] = HrSTM(trainX,trainY,solver,R,C,1e-5,10);
+        [W,b] = HrSTM(trainX,trainY,solver,R,C,1e-5,50);
         if b == -1
             continue;
         end
