@@ -15,7 +15,7 @@ X = [0.8147    0.2785;
 Y = [-1 -1 -1 -1 -1 -1 -1 1 1 1 1 1 1]';
 
 % firstly we call fitcsvm method on given data
-SVM = fitcSVM(X, Y);
+SVM = fitcsvm(X, Y);
 
 sv = SVM.SupportVectors;
 w = SVM.Beta;
@@ -43,7 +43,7 @@ legend('-1', '1', 'Support Vector', 'Upper Margin', 'Lower Margin');
 hold off;
 
 % now we call mySVM on given data
-[w, b, sv_index] = mySVM(X,Y,'linear', 100);
+[w, b, sv_index] = mySVM(X,Y,'linear', .1);
 
 sv = X(sv_index,:);
 X2 = (-w(1) * X1-b) / w(2);     % X1 stays the same

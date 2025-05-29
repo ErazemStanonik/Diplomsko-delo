@@ -1,4 +1,4 @@
-function [trainX,trainY, testX,testY] = synthetic_init(sample_num,img_size,background, random)
+function [X,Y] = synthetic_init(sample_num,img_size,background, random)
 % We will generate BLACK AND WHITE squares, triangles and circles.
 % 
 % sample num tells us number of observations
@@ -92,12 +92,3 @@ for l = 2*sample_num+1:3*sample_num
     X(:,:,l) = img;
     Y(l) = 3;
 end
-
-% split into training and testing
-class_size = round(sample_num / 5);
-train_idx = setdiff(1:3*sample_num, [1:class_size, sample_num+1:sample_num+class_size, 2*sample_num+1:2*sample_num+class_size]);
-test_idx = setdiff(1:3*sample_num, train_idx);
-trainX = X(:,:,train_idx);
-trainY = Y(train_idx);
-testX = X(:,:,test_idx);
-testY = Y(test_idx);

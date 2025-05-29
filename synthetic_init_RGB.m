@@ -25,29 +25,29 @@ X = tensor(zeros(img_size, img_size, 3, 2*sample_num));
 Y = zeros(2*sample_num,1);
 
 % Square
-% for i = 1:sample_num
-%     img = zeros(img_size);
-%     if random
-%         % square sizes will vary from 4/16 to 9/16 of img
-%         square_size = randi([img_size/2,img_size/2+img_size/4]);
-%         % we also choose x and y position as random
-%         x = randi([1,img_size-square_size+1]);
-%         y = randi([1,img_size-square_size+1]);
-%     else
-%         square_size = 3*img_size/4;
-%         x = img_size / 8;
-%         y = img_size / 8;
-%     end
-%     % fill the square
-%     img(y:y+square_size-1, x:x+square_size-1) = 1;
-%     for c=1:3
-%         X(:,:,c,i) = bg + val*(img * rand);
-%     end
-%     Y(i) = 1;
-% end
+for i = 1:sample_num
+    img = zeros(img_size);
+    if random
+        % square sizes will vary from 4/16 to 9/16 of img
+        square_size = randi([img_size/2,img_size/2+img_size/4]);
+        % we also choose x and y position as random
+        x = randi([1,img_size-square_size+1]);
+        y = randi([1,img_size-square_size+1]);
+    else
+        square_size = 3*img_size/4;
+        x = img_size / 8;
+        y = img_size / 8;
+    end
+    % fill the square
+    img(y:y+square_size-1, x:x+square_size-1) = 1;
+    for c=1:3
+        X(:,:,c,i) = bg + val*(img * rand);
+    end
+    Y(i) = 1;
+end
 
 % Triangle
-for j = 1:sample_num %j = sample_num+1:2*sample_num
+for j = sample_num+1:2*sample_num
     img = zeros(img_size);
     if random
         % triangle sizes will vary from 1/16 to 1/4 of img
@@ -67,11 +67,11 @@ for j = 1:sample_num %j = sample_num+1:2*sample_num
     for c=1:3
         X(:,:,c,j) = bg + val*(img * rand);
     end
-    Y(j) = 1;
+    Y(j) = 2;
 end
 
 % Circle
-for l = sample_num+1:2*sample_num%2*sample_num+1:3*sample_num
+for l = 2*sample_num+1:3*sample_num
     img = zeros(img_size);
     if random
         radius = randi([2*img_size/8,3*img_size/8]);
@@ -96,10 +96,5 @@ for l = sample_num+1:2*sample_num%2*sample_num+1:3*sample_num
     for c=1:3
         X(:,:,c,l) = bg + val*(img * rand);
     end
-    Y(l) = -1;%0;
+    Y(l) = 3;
 end
-    
-% now we remix the order in X and Y so we can use cross-validation.
-order = randperm(2*sample_num);
-X = X(:,:,:,order);
-Y = Y(order);

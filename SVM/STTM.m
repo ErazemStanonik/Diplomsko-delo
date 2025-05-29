@@ -97,4 +97,4 @@ while err > epsilon && it < maxIt
     end
     it = it + 1;
 end
-fprintf("Error after %d iterations is %f\n", it, err);
+%fprintf("Error after %d iterations is %f\n", it, err);

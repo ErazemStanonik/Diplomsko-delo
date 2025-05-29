@@ -53,6 +53,5 @@ while err > epsilon && it < maxIt
     end
     it = it + 1;
 end
-fprintf('Err = %f it = %d\n', err, it);
-disp('-------');
+%fprintf('Err = %f it = %d\n', err, it);
 W = tensor(toTensor(w));

@@ -47,12 +47,10 @@ function [W, b] = HrSTM(X,Y,solver,R,C,epsilon,maxIt)
             [V,D] = eig(B);
             % we set the eigenvalues belowe a certain threshold to 0
             % possible improvement for future papers
-%             th = 1e-2;
-%             D(D<th) = Inf;
+            % th = 1e-2;
+            % D(D<th) = Inf;
             newD = diag(1 ./ sqrt(diag(D)));
             B_sqrt_ = V * newD * V';
-            %B_sqrt_ = V * diag(1 ./ sqrt(diag(D))) * V';
-            %B_sqrt_ = pinv(sqrtm(B)); 
             
             Xji_tilde = zeros(m, dim*R);
             for i = 1:m
@@ -98,5 +96,6 @@ function [W, b] = HrSTM(X,Y,solver,R,C,epsilon,maxIt)
         end
         it = it + 1;
     end
+    %fprintf('Err = %f, it = %d\n', err, it);
     W = tensor(cpToTensor(cores,ones(R),R,sizes(1:d)));
 end

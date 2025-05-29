@@ -46,6 +46,6 @@ for C = cRange
         if bestAcc < accuracy
             bestAcc = accuracy;
         end
-        fprintf('Accuracy for C = %.2f and R = %d is %.4f\n', C,R,accuracy);
+        fprintf('*** HrSTM Accuracy for C = %.2f and R = %d is %.4f ***\n', C,R,accuracy);
     end
 end

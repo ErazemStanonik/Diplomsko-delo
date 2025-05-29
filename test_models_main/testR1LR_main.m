@@ -16,7 +16,7 @@ for i = 1:num_classes
     tempTrainY(trainY ~= i) = -1;
     tempTrainY(trainY == i) = 1;
 
-    [W,b] = r1LR(trainX, tempTrainY, 'fitclinear', 2.5e-1, 30);
+    [W,b] = r1LR(trainX, tempTrainY, 'fitclinear', 1e-3, 20);
     r1LRs{i} = @(X) 1 / (1 + exp(-(innerprod(W,X)+b)));
 end
 fprintf('Building a casscade of rank-1 LRs took ');
@@ -37,3 +37,4 @@ for i = 1:num_test_samples
     correct = correct + (ix == testY(i));
 end
 accuracy = correct / num_test_samples;
+fprintf('*** R1LR Accuracy is %.4f ***\n', accuracy);

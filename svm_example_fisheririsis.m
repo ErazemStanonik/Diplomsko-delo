@@ -6,7 +6,7 @@ inds = ~strcmp(species,'versicolor');
 X = meas(inds,1:2);
 s = species(inds);
 
-SVMModel = fitcSVM(X,s);
+SVMModel = fitcsvm(X,s);
 
 sv = SVMModel.SupportVectors; % Support vectors
 beta = SVMModel.Beta; % Linear predictor coefficients
@@ -36,7 +36,7 @@ X2margin_high = X2-beta(2)*m^2;
 % now my function of SVM
 Y = strcmp(s, 'setosa')*-2 + 1;  % Y is now either -1 or 1
 
-[w,b,sv_index] = mySVM(X,Y,'linear',.1);
+[w,b,sv_index] = mySVM(X,Y,'linear',1);
 
 sv = X(sv_index,:);
 X2 = (-w(1) * X1-b) / w(2);     % X1 stays the same

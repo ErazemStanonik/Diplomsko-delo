@@ -21,7 +21,7 @@ for R = rRange
         tempTrainY(trainY ~= i) = -1;
         tempTrainY(trainY == i) = 1;
         
-        [W,b] = LTR(trainX,tempTrainY,R,2.5e-1,30);
+        [W,b] = LTR(trainX,tempTrainY,R,1e-3,20);
         LTRs{i} = @(X) 1 / (1 + exp(-(innerprod(W,X)+b)));
     end
     fprintf('Building a casscade of LTRs took ');
@@ -45,5 +45,5 @@ for R = rRange
     if bestAcc < accuracy
         bestAcc = accuracy;
     end
-    fprintf('Accuracy for R = %.2f is %.4f\n', R,accuracy);
+    fprintf('*** LTR Accuracy for R = %.2f is %.4f ***\n', R,accuracy);
 end

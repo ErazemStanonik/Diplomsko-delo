@@ -44,5 +44,5 @@ for C = cRange
     if bestAcc < accuracy
         bestAcc = accuracy;
     end
-    fprintf('Accuracy for C = %.2f is %.4f\n', C, accuracy);
+    fprintf('*** STM Accuracy for C = %.2f is %.4f ***\n', C, accuracy);
 end

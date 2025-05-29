@@ -41,7 +41,7 @@ function [W, b] = STuM(X, Y, solver, ranks, C, epsilon, maxIt)
 
             K = Hj * Hj';
             [V,D] = eig(K);
-%             th = 1e-4;
+%             th = 5e-3;
 %             D(D < th) = Inf;
             K_sqrt_ = V * diag(1 ./ sqrt(diag(D))) * V';
             %K_sqrt_ = pinv(sqrtm(K));
@@ -117,7 +117,7 @@ function [W, b] = STuM(X, Y, solver, ranks, C, epsilon, maxIt)
 %             b = G_SVM.Bias;
 %         end
 
-        G = tensor(reshape(G1, ranks), ranks);
+        G = tensor(reshape(full(G1), ranks), ranks);
 
         % we have to check for err
         err = norm(G - G_old);
@@ -128,5 +128,5 @@ function [W, b] = STuM(X, Y, solver, ranks, C, epsilon, maxIt)
     end
     % we reconstruct Tucker decomposition of W back to W
     W = ttm(G,P);
-    fprintf('Err = %f, it = %d\n', err, it);
+    %fprintf('Err = %f, it = %d\n', err, it);
 end

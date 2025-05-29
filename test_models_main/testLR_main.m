@@ -48,3 +48,4 @@ for i = 1:num_test_samples
     correct = correct + (idx == testY(i));
 end
 accuracy = correct / num_test_samples;
+fprintf('*** LR Accuracy is %.4f *** \n', accuracy);
